@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Minis Maps</string>
+    <string name="settings">Settings</string>
+    <string name="new_map">New Map</string>
+    <string name="change_name">Change Name</string>
+    <string name="ok">OK</string>
+    <string name="maps">Maps</string>
+    <string name="pcs">PCs</string>
+</resources>
