@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.minismap.DialogLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:dialogTitle="@string/edit_character">
+
+    <EditText
+        android:id="@+id/edit_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:inputType="textCapWords"
+        android:hint="@string/name" />
+
+    <EditText
+        android:id="@+id/edit_abbreviation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:inputType="textCapWords"
+        android:hint="@string/abbreviation" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:text="@string/type"/>
+
+    <RadioGroup
+        android:id="@+id/radio_group_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:paddingLeft="10dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radio_pc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pc"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/radio_npc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/npc"/>
+
+    </RadioGroup>
+
+</com.minismap.DialogLayout>

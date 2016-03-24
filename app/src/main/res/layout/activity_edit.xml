@@ -15,4 +15,176 @@
         android:theme="@style/AppTheme.AppBarOverlay"
         app:popupTheme="@style/AppTheme.PopupOverlay" />
 
+    <HorizontalScrollView
+        android:id="@+id/layout_toolbars"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/my_toolbar">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/spinner_toolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:spinnerMode="dropdown" />
+
+            <LinearLayout
+                android:id="@+id/toolbar_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/origin"/>
+
+                <EditText
+                    android:id="@+id/edit_x0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="3"
+                    android:inputType="number" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/comma"/>
+
+                <EditText
+                    android:id="@+id/edit_y0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="3"
+                    android:inputType="number" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/box_size"/>
+
+                <EditText
+                    android:id="@+id/edit_boxSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="3"
+                    android:inputType="number" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/size"/>
+
+                <EditText
+                    android:id="@+id/edit_width"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="4"
+                    android:inputType="number"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/comma"/>
+
+                <EditText
+                    android:id="@+id/edit_height"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="4"
+                    android:inputType="number"/>
+
+                <ImageButton
+                    android:id="@+id/btn_update"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/my_update"
+                    android:onClick="update"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/toolbar_enemies"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/chk_show_grid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/show_grid"
+                    android:checked="true"
+                    android:onClick="update"/>
+
+                <Button
+                    android:id="@+id/btn_delete_enemy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/delete_selected"
+                    android:onClick="update"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/toolbar_fogOfWar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/chk_show_gridf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/show_grid"
+                    android:checked="true"
+                    android:onClick="update"/>
+
+                <Spinner
+                    android:id="@+id/spinner_fog_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:spinnerMode="dropdown" />
+
+                <Button
+                    android:id="@+id/btn_deselect_fog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/deselect_fog"
+                    android:onClick="update"/>
+
+                <Button
+                    android:id="@+id/btn_delete_fog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/delete_selected"
+                    android:onClick="update"/>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+
+    <ScrollView
+        android:layout_below="@+id/layout_toolbars"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.minismap.MapView
+            android:id="@+id/mapView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"/>
+
+    </ScrollView>
+
 </RelativeLayout>

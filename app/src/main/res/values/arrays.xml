@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="map_toolbars_array">
+        <item>Layout</item>
+        <item>Enemies</item>
+        <item>Fog of War</item>
+    </string-array>
+    <string-array name="map_fogMode_array">
+        <item>Single</item>
+        <item>Rectangle</item>
+    </string-array>
+</resources>

@@ -3,4 +3,11 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="player">#FF1A5F1A</color>
+    <color name="npc">#FF1A1A5F</color>
+    <color name="enemy">#FF5F1A1A</color>
+    <color name="colourLayout">#FFFF00</color>
+    <color name="colorFog">#2F4F4F</color>
+    <color name="colorTransFog">#802F4F4F</color>
+    <color name="colorFogRect">#00FF00</color>
 </resources>

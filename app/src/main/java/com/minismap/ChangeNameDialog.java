@@ -18,10 +18,11 @@ import android.widget.EditText;
 public class ChangeNameDialog extends DialogFragment {
 
     public interface OnClickListener {
-        public void onNameChange(String name);
+        public void onNameChange(String tag, String name, Bundle data);
     }
 
     public static final String NAME = "name";
+    public static final String TITLE = "title";
 
     private ChangeNameDialog.OnClickListener listener = null;
 
@@ -38,23 +39,31 @@ public class ChangeNameDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_change_name, null);
+        DialogLayout view = (DialogLayout)inflater.inflate(R.layout.dialog_change_name, null);
+        if(getArguments().containsKey(TITLE)) {
+            view.setTitle(getArguments().getString(TITLE));
+        }
         EditText et = (EditText)view.findViewById(R.id.edit_name);
         et.setText(getArguments().getString(NAME));
         builder.setView(view)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        EditText et = (EditText)ChangeNameDialog.this.getDialog().findViewById(R.id.edit_name);
-                        ChangeNameDialog.this.listener.onNameChange(et.getText().toString());
-                        ChangeNameDialog.this.listener.onNameChange(et.getText().toString());
+                        doPositiveClick();
                     }
                 })
+                .setNegativeButton(R.string.cancel, null)
                 .setCancelable(true);
 
         AlertDialog dialog = builder.create();
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         return dialog;
+    }
+
+    private void doPositiveClick() {
+        EditText et = (EditText)getDialog().findViewById(R.id.edit_name);
+        listener.onNameChange(getTag(), et.getText().toString(), getArguments());
+        listener.onNameChange(getTag(), et.getText().toString(), getArguments());
     }
 
 }

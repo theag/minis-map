@@ -15,6 +15,8 @@ import android.widget.TextView;
  */
 public class DialogLayout extends LinearLayout {
 
+    private TextView title;
+
     public DialogLayout(Context context) {
         super(context);
         init(null, 0);
@@ -42,28 +44,36 @@ public class DialogLayout extends LinearLayout {
         }
         a.recycle();
 
-        TextView tv = new TextView(getContext());
+        title = new TextView(getContext());
         int colour;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            tv.setTextAppearance(android.R.style.TextAppearance_Large);
+            title.setTextAppearance(android.R.style.TextAppearance_Large);
             colour = getResources().getColor(R.color.colorAccent, null);
         } else {
-            tv.setTextAppearance(getContext(), android.R.style.TextAppearance_Large);
+            title.setTextAppearance(getContext(), android.R.style.TextAppearance_Large);
             colour = getResources().getColor(R.color.colorAccent);
         }
-        tv.setTextColor(colour);
-        tv.setText(name);
+        title.setTextColor(colour);
+        title.setText(name);
         int padding = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
-        tv.setPadding(padding, padding, padding, padding);
+        title.setPadding(padding, padding, padding, padding);
         LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        tv.setLayoutParams(lp);
-        addView(tv);
+        title.setLayoutParams(lp);
+        addView(title);
 
         View v = new View(getContext());
         lp = new LayoutParams(LayoutParams.MATCH_PARENT, (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
         v.setLayoutParams(lp);
         v.setBackgroundColor(colour);
         addView(v);
+    }
+
+    public void setTitle(String title) {
+        this.title.setText(title);
+    }
+
+    public void setTitle(int resid) {
+        title.setText(resid);
     }
 
 }
