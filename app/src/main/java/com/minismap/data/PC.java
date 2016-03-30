@@ -10,10 +10,8 @@ public class PC {
     public static final int pc = 0;
     public static final int npc = 1;
 
-    private static final String sep = "" +((char)31);
-
     public static PC load(String line) {
-        StringTokenizer tokens = new StringTokenizer(line, sep);
+        StringTokenizer tokens = new StringTokenizer(line, Seperators.PC);
         return new PC(Integer.parseInt(tokens.nextToken()), tokens.nextToken(), tokens.nextToken());
     }
 
@@ -39,6 +37,6 @@ public class PC {
     }
 
     public String save() {
-        return type +sep +name +sep +abbreviation;
+        return type +Seperators.PC +name +Seperators.PC +abbreviation;
     }
 }

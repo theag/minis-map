@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,9 +27,9 @@ import java.io.IOException;
 
 public class EditActivity extends AppCompatActivity implements ChangeNameDialog.OnClickListener,
     AdapterView.OnItemSelectedListener, MapView.OnTapListener, AddEnemyDialog.OnClickListener,
-    EditEnemyDialog.OnClickListener {
+    EditEnemyDialog.OnClickListener, AddEntryDialog.OnClickListener, EditEntryDialog.OnClickListener {
 
-    private static final int[] toolbarIDs = {R.id.toolbar_layout, R.id.toolbar_enemies, R.id.toolbar_fogOfWar};
+    private static final int[] toolbarIDs = {R.id.toolbar_layout, R.id.toolbar_enemies, R.id.toolbar_fogOfWar, R.id.toolbar_entries};
     private static final int IMAGE_REQUEST = 1;
     private static final String CHANGE_NAME_DIALOG = "change name dialog";
     private static final String ADD_FOG_DIALOG = "add fog dialog";
@@ -66,12 +67,17 @@ public class EditActivity extends AppCompatActivity implements ChangeNameDialog.
         et = (EditText)findViewById(R.id.edit_y0);
         et.setText("" + map.y0);
         et = (EditText)findViewById(R.id.edit_boxSize);
-        et.setText(""+map.boxSize);
+        et.setText("" + map.boxSize);
         et = (EditText)findViewById(R.id.edit_width);
         et.setText(""+map.width);
         et = (EditText)findViewById(R.id.edit_height);
         et.setText(""+map.height);
 
+        spinner = (Spinner)findViewById(R.id.spinner_fogs);
+        ArrayAdapter<String> sadapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, map.getFogNames());
+        sadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(sadapter);
+        spinner.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -162,11 +168,12 @@ public class EditActivity extends AppCompatActivity implements ChangeNameDialog.
                     MapArray.getInstance().unloadOtherBackgounds(null);
                     mapView.setMapBackground(MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri));
                 } catch (IOException e) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage("Could not find file.")
-                            .setTitle("Error")
-                            .setPositiveButton("OK", null);
-                    builder.create().show();
+                    MessageDialog frag = new MessageDialog();
+                    Bundle args = new Bundle();
+                    args.putString(MessageDialog.TITLE, "Error");
+                    args.putString(MessageDialog.MESSAGE, "Could not find file.");
+                    frag.setArguments(args);
+                    frag.show(getSupportFragmentManager(), "dialog");
                 }
 
             }
@@ -185,9 +192,19 @@ public class EditActivity extends AppCompatActivity implements ChangeNameDialog.
                 mapView.setDrawingMode(position);
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                if(mapView.getDrawingMode() == MapView.MODE_ENTRY) {
+                    Spinner spinner = (Spinner)findViewById(R.id.spinner_fogs);
+                    ArrayAdapter<String> sadapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mapView.getMapFogNames());
+                    sadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinner.setAdapter(sadapter);
+                    mapView.setSelectedFog(0);
+                }
                 break;
             case R.id.spinner_fog_mode:
                 mapView.setFogMode(position);
+                break;
+            case R.id.spinner_fogs:
+                mapView.setSelectedFog(position);
                 break;
             default:
                 System.out.println("bad item select: " +view.getClass().getSimpleName() +" " +view.getParent().getClass().getSimpleName());
@@ -232,6 +249,12 @@ public class EditActivity extends AppCompatActivity implements ChangeNameDialog.
             case R.id.btn_delete_fog:
                 mapView.deleteSelectedFog();
                 break;
+            case R.id.btn_deselect_entry:
+                mapView.deselectEntry();
+                break;
+            case R.id.btn_delete_entry:
+                mapView.deleteSelectedEntry();
+                break;
         }
     }
 
@@ -260,12 +283,22 @@ public class EditActivity extends AppCompatActivity implements ChangeNameDialog.
 
     @Override
     public void onMoveTapError(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(message)
-                .setTitle("Error")
-                .setPositiveButton("OK", null)
-                .setCancelable(true);
-        builder.create().show();
+        MessageDialog frag = new MessageDialog();
+        Bundle args = new Bundle();
+        args.putString(MessageDialog.TITLE, "Error");
+        args.putString(MessageDialog.MESSAGE, message);
+        frag.setArguments(args);
+        frag.show(getSupportFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void onRemoveError(String message) {
+        MessageDialog frag = new MessageDialog();
+        Bundle args = new Bundle();
+        args.putString(MessageDialog.TITLE, "Error");
+        args.putString(MessageDialog.MESSAGE, message);
+        frag.setArguments(args);
+        frag.show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
@@ -306,6 +339,31 @@ public class EditActivity extends AppCompatActivity implements ChangeNameDialog.
     }
 
     @Override
+    public void onAddEntry(int startx, int starty, int endx, int endy) {
+        AddEntryDialog frag = new AddEntryDialog();
+        Bundle args = new Bundle();
+        args.putInt(AddEntryDialog.START_X, startx);
+        args.putInt(AddEntryDialog.START_Y, starty);
+        args.putInt(AddEntryDialog.END_X, endx);
+        args.putInt(AddEntryDialog.END_Y, endy);
+        frag.setArguments(args);
+        frag.show(getSupportFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void onChangeEntry(int entryIndex) {
+        EditEntryDialog frag = new EditEntryDialog();
+        Bundle args = new Bundle();
+        MapView mapView = (MapView)findViewById(R.id.mapView);
+        args.putInt(EditEntryDialog.MAP_INDEX, mapView.getMapIndex());
+        Spinner spinner = (Spinner)findViewById(R.id.spinner_fogs);
+        args.putInt(EditEntryDialog.FOG_INDEX, spinner.getSelectedItemPosition());
+        args.putInt(EditEntryDialog.ENTRY_INDEX, entryIndex);
+        frag.setArguments(args);
+        frag.show(getSupportFragmentManager(), "dialog");
+    }
+
+    @Override
     public void onEnemyAdd(String name, String abbreviation, int x, int y) {
         MapView mapView = (MapView)findViewById(R.id.mapView);
         mapView.addEnemy(name, abbreviation, x, y);
@@ -315,5 +373,17 @@ public class EditActivity extends AppCompatActivity implements ChangeNameDialog.
     public void onEnemyEdit(int index, String name, String abbreviation) {
         MapView mapView = (MapView)findViewById(R.id.mapView);
         mapView.editEnemy(index, name, abbreviation);
+    }
+
+    @Override
+    public void onEntryAdd(String abbreviation, String lockMessage, int startx, int starty, int endx, int endy) {
+        MapView mapView = (MapView)findViewById(R.id.mapView);
+        mapView.addEntryToSelectedFog(abbreviation, lockMessage, startx, starty, endx, endy);
+    }
+
+    @Override
+    public void onEntryEdit(int index, String abbreviation, String lockMessage) {
+        MapView mapView = (MapView)findViewById(R.id.mapView);
+        mapView.editEntryOfSelectedFog(index, abbreviation, lockMessage);
     }
 }

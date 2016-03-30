@@ -31,6 +31,10 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="edit_enemy">Edit Enemy</string>
-    <string name="deselect_fog">Deselect Fog</string>
-    <string name="delete_selected">Delete Selected</string>
+    <string name="deselect">Deselect</string>
+    <string name="select_fog">Select Fog:</string>
+    <string name="add_fog_entry">Add Fog Entry</string>
+    <string name="lock_message">Lock Message</string>
+    <string name="edit_entry">Edit Entry</string>
+    <string name="edit_fog_entry">Edit Fog Entry</string>
 </resources>

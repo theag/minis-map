@@ -4,6 +4,7 @@
         <item>Layout</item>
         <item>Enemies</item>
         <item>Fog of War</item>
+        <item>Entryways</item>
     </string-array>
     <string-array name="map_fogMode_array">
         <item>Single</item>

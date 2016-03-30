@@ -16,37 +16,14 @@ import java.util.StringTokenizer;
 public class Map {
 
     private static final Random rand = new Random();
-    private static final String sep = ""+((char)30);
-    private static final String array_sep = ""+((char)31);
-    public static final String nullStr = ""+((char)0);
-
     public static File dir = null;
 
-    public static String nullConvert(String str) {
-        if(str == null) {
-            return nullStr;
-        } else if(str.compareTo(nullStr) == 0) {
-            return null;
-        } else {
-            return str;
-        }
-    }
-
-    public static String emptyConvert(String str) {
-        if(str == null || str.isEmpty()) {
-            return nullStr;
-        } else if(str.compareTo(nullStr) == 0) {
-            return "";
-        } else {
-            return str;
-        }
-    }
 
     public static Map load(File dir, String line) {
         Map.dir = dir;
-        StringTokenizer tokens = new StringTokenizer(line, sep);
+        StringTokenizer tokens = new StringTokenizer(line, Seperators.MAP);
         Map rv = new Map(tokens.nextToken());
-        rv.filename = nullConvert(tokens.nextToken());
+        rv.filename = Seperators.nullConvert(tokens.nextToken());
         if(rv.filename != null) {
             rv.background = BitmapFactory.decodeFile(dir.getAbsolutePath() +File.separator +rv.filename);
         }
@@ -58,14 +35,14 @@ public class Map {
         String token;
         while(tokens.hasMoreTokens()) {
             token = tokens.nextToken();
-            if(token.compareTo(array_sep) == 0) {
+            if(token.compareTo(Seperators.NEW_ARRAY_INDICATOR) == 0) {
                 break;
             }
             rv.enemies.add(Enemy.load(token));
         }
         while(tokens.hasMoreTokens()) {
             token = tokens.nextToken();
-            if(token.compareTo(array_sep) == 0) {
+            if(token.compareTo(Seperators.NEW_ARRAY_INDICATOR) == 0) {
                 break;
             }
             rv.fogs.add(FogOfWar.load(token));
@@ -166,13 +143,13 @@ public class Map {
             }
             background.recycle();
         }
-        String rv = name +sep +nullConvert(filename) +sep +x0 +sep +y0 +sep +boxSize +sep +width +sep +height;
+        String rv = name +Seperators.MAP +Seperators.nullConvert(filename) +Seperators.MAP +x0 +Seperators.MAP +y0 +Seperators.MAP +boxSize +Seperators.MAP +width +Seperators.MAP +height;
         for(Enemy enemy : enemies) {
-            rv += sep +enemy.save();
+            rv += Seperators.MAP +enemy.save();
         }
-        rv += sep +array_sep;
+        rv += Seperators.MAP +Seperators.NEW_ARRAY_INDICATOR;
         for(FogOfWar fog : fogs) {
-            rv += sep +fog.save();
+            rv += Seperators.MAP +fog.save();
         }
         return rv;
     }
@@ -276,5 +253,13 @@ public class Map {
             background.recycle();
             background = null;
         }
+    }
+
+    public String[] getFogNames() {
+        String[] rv = new String[fogs.size()];
+        for(int i = 0; i < rv.length; i++) {
+            rv[i] = fogs.get(i).name;
+        }
+        return rv;
     }
 }

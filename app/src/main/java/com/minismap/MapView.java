@@ -6,12 +6,14 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.widget.ImageView;
 
 import com.minismap.data.Enemy;
+import com.minismap.data.Entry;
 import com.minismap.data.FogOfWar;
 import com.minismap.data.GridPoint;
 import com.minismap.data.Map;
@@ -25,6 +27,7 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
     public static final int MODE_LAYOUT = 0;
     public static final int MODE_ENEMY = 1;
     public static final int MODE_FOG = 2;
+    public static final int MODE_ENTRY = 3;
 
     public static final int FOG_RECTANGLE = 1;
     public static final int FOG_SINGLE = 0;
@@ -33,9 +36,12 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
         void onAddEnemy(int x, int y);
         void onChangeEnemy(int enemyIndex);
         void onMoveTapError(String message);
+        void onRemoveError(String message);
         void onAddFog(int x, int y);
         void onAddFog(int startx, int starty, int endx, int endy);
         void onChangeFog(int fogIndex);
+        void onAddEntry(int startx, int starty, int endx, int endy);
+        void onChangeEntry(int entryIndex);
     }
 
     private Map map;
@@ -47,11 +53,13 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
     private int fogColour;
     private int fogOutlineColour;
     private int fogRColour;
+    private int entryColour;
     private boolean showGrid;
     private GestureDetector mDetector;
     private OnTapListener listener;
     private Enemy selectedEnemy;
     private FogOfWar selectedFog;
+    private Entry selectedEntry;
     private GridPoint start;
 
     public MapView(Context context) {
@@ -73,17 +81,19 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
         map = null;
         drawingMode = MODE_LAYOUT;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            gridColour = getContext().getColor(R.color.colourLayout);
+            gridColour = getContext().getColor(R.color.layout);
             enemyColour = getContext().getColor(R.color.enemy);
-            fogColour = getContext().getColor(R.color.colorTransFog);
-            fogOutlineColour = getContext().getColor(R.color.colorFog);
-            fogRColour = getContext().getColor(R.color.colorFogRect);
+            fogColour = getContext().getColor(R.color.transFog);
+            fogOutlineColour = getContext().getColor(R.color.fog);
+            fogRColour = getContext().getColor(R.color.fogRect);
+            entryColour = getContext().getColor(R.color.entry);
         } else {
-            gridColour = getResources().getColor(R.color.colourLayout);
+            gridColour = getResources().getColor(R.color.layout);
             enemyColour = getResources().getColor(R.color.enemy);
-            fogColour = getResources().getColor(R.color.colorTransFog);
-            fogOutlineColour = getResources().getColor(R.color.colorFog);
-            fogRColour = getResources().getColor(R.color.colorFogRect);
+            fogColour = getResources().getColor(R.color.transFog);
+            fogOutlineColour = getResources().getColor(R.color.fog);
+            fogRColour = getResources().getColor(R.color.fogRect);
+            entryColour = getResources().getColor(R.color.entry);
         }
         textColour = 0xFFFFFFFF;
         showGrid = true;
@@ -202,6 +212,10 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
         map.getFog(index).name = name;
     }
 
+    public String[] getMapFogNames() {
+        return map.getFogNames();
+    }
+
     public void deleteSelectedEnemy() {
         if(selectedEnemy != null) {
             map.enemies.remove(selectedEnemy);
@@ -214,6 +228,35 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
         if(selectedFog != null) {
             map.removeFog(selectedFog);
             selectedFog = null;
+            invalidate();
+        }
+    }
+
+    public void setSelectedFog(int fogIndex) {
+        selectedFog = map.getFog(fogIndex);
+        invalidate();
+    }
+
+    public void addEntryToSelectedFog(String abbreviation, String lockMessage, int startx, int starty, int endx, int endy) {
+        selectedFog.addEntry(abbreviation, lockMessage, startx, starty, endx, endy);
+        invalidate();
+    }
+
+    public void editEntryOfSelectedFog(int index, String abbreviation, String lockMessage) {
+        Entry entry = selectedFog.getEntry(index);
+        entry.abbreviation = abbreviation;
+        entry.lockMessage = lockMessage;
+    }
+
+    public void deselectEntry() {
+        selectedEntry = null;
+        invalidate();
+    }
+
+    public void deleteSelectedEntry() {
+        if(selectedEntry != null) {
+            selectedFog.removeEntry(selectedEntry);
+            selectedEntry = null;
             invalidate();
         }
     }
@@ -246,7 +289,81 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
                     }
                     drawFog(canvas, width, height);
                     break;
+                case MODE_ENTRY:
+                    if(showGrid) {
+                        drawGrid(canvas, width, height);
+                    }
+                    drawSelectedFog(canvas, width, height);
+                    drawEntry(canvas, width, height);
+                    break;
             }
+        }
+    }
+
+    private void drawSelectedFog(Canvas canvas, int width, int height) {
+        Paint fog = new Paint();
+        fog.setColor(fogColour);
+        Paint outline = new Paint();
+        outline.setColor(fogOutlineColour);
+        outline.setStyle(Paint.Style.STROKE);
+        outline.setStrokeWidth(0.05f * map.boxSize);
+        GridPoint gp;
+        float x, y;
+        for(int j = 0; j < selectedFog.pointCount(); j++) {
+            gp = selectedFog.getPoint(j);
+            x = map.x0 + gp.x*map.boxSize;
+            y = map.y0 + gp.y*map.boxSize;
+            canvas.drawRect(x, y, x + map.boxSize, y + map.boxSize, fog);
+            canvas.drawLines(selectedFog.getOutline(map.x0, map.y0, map.boxSize), outline);
+        }
+    }
+
+    private void drawEntry(Canvas canvas, int width, int height) {
+        Paint entry = new Paint();
+        entry.setColor(entryColour);
+        entry.setStyle(Paint.Style.STROKE);
+        entry.setStrokeWidth(0.1f * map.boxSize - 1);
+        Paint selected = new Paint();
+        selected.setColor(gridColour);
+        selected.setStyle(Paint.Style.STROKE);
+        selected.setStrokeWidth(0.1f * map.boxSize - 1);
+        Paint highlight = new Paint();
+        highlight.setColor(fogRColour);
+        highlight.setStyle(Paint.Style.STROKE);
+        highlight.setStrokeWidth(0.1f * map.boxSize - 1);
+        Entry current;
+        float ex, ey, sx, sy;
+        for(int i = 0; i < selectedFog.entryCount(); i++) {
+            current = selectedFog.getEntry(i);
+            if(current == selectedEntry) {
+                for(GridPoint ep : current.ends) {
+                    ex = map.x0 + ep.x*map.boxSize;
+                    ey = map.y0 + ep.y*map.boxSize;
+                    canvas.drawRect(ex, ey, ex + map.boxSize, ey + map.boxSize, selected);
+                }
+                for(GridPoint sp : current.starts) {
+                    sx = map.x0 + sp.x*map.boxSize;
+                    sy = map.y0 + sp.y*map.boxSize;
+                    canvas.drawRect(sx, sy, sx + map.boxSize, sy + map.boxSize, selected);
+                }
+            }
+            for(GridPoint ep : current.ends) {
+                ex = map.x0 + ep.x*map.boxSize + map.boxSize / 2f;
+                ey = map.y0 + ep.y*map.boxSize + map.boxSize / 2f;
+                //entry.setStyle(Paint.Style.FILL);
+                //canvas.drawCircle(ex, ey, 0.25f * map.boxSize, entry);
+                //entry.setStyle(Paint.Style.STROKE);
+                for(GridPoint sp : current.starts) {
+                    sx = map.x0 + sp.x*map.boxSize + map.boxSize / 2f;
+                    sy = map.y0 + sp.y*map.boxSize + map.boxSize / 2f;
+                    canvas.drawLine(sx, sy, ex, ey, entry);
+                }
+            }
+        }
+        if(start != null) {
+            sx = map.x0 + start.x*map.boxSize;
+            sy = map.y0 + start.y*map.boxSize;
+            canvas.drawRect(sx, sy, sx + map.boxSize, sy + map.boxSize, highlight);
         }
     }
 
@@ -364,14 +481,21 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
-        if(listener != null) {
-            switch(drawingMode) {
-                case MODE_ENEMY:
-                    return singleTapEnemy(e.getX(), e.getY());
-                case MODE_FOG:
-                    return singleTapFog(e.getX(), e.getY());
-                default:
-                    return false;
+        if (listener != null) {
+            try {
+                switch (drawingMode) {
+                    case MODE_ENEMY:
+                        return singleTapEnemy(e.getX(), e.getY());
+                    case MODE_FOG:
+                        return singleTapFog(e.getX(), e.getY());
+                    case MODE_ENTRY:
+                        return singleTapEntry(e.getX(), e.getY());
+                    default:
+                        return false;
+                }
+            } catch(EmptyObjectException ex) {
+                listener.onRemoveError(ex.getMessage());
+                return false;
             }
         } else {
             return false;
@@ -392,6 +516,9 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
                     break;
                 case MODE_FOG:
                     longPressFog(e.getX(), e.getY());
+                    break;
+                case MODE_ENTRY:
+                    longPressEntry(e.getX(), e.getY());
                     break;
             }
         }
@@ -452,7 +579,7 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
         add method for deselect
      */
 
-    private boolean singleTapFog(float ex, float ey) {
+    private boolean singleTapFog(float ex, float ey) throws EmptyObjectException {
         int x = (int) (ex - map.x0) / map.boxSize;
         int y = (int) (ey - map.y0) / map.boxSize;
         if (x >= 0 && y >= 0 && (map.width < 0 || x < map.width) && (map.height < 0 || y < map.height)) {
@@ -475,7 +602,7 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
                     start = null;
                     invalidate();
                 }
-            } else {
+            } else if(fogMode == FOG_SINGLE) {
                 if(selectedFog.contains(gp)) {
                     selectedFog.removePoint(gp);
                     invalidate();
@@ -506,13 +633,68 @@ public class MapView extends ImageView implements GestureDetector.OnGestureListe
                         listener.onAddFog(Math.min(start.x, x), Math.min(start.y, y), Math.max(start.x, x), Math.max(start.y, y));
                         start = null;
                     }
-                } else {
+                } else if(fogMode == FOG_SINGLE) {
                     start = null;
                     listener.onAddFog(x, y);
                 }
             } else {
                 start = null;
                 listener.onChangeFog(fogIndex);
+            }
+        }
+    }
+
+    /*Entry
+        single tap in entry: if entry selected then remove square else select entry
+        single tap outside entry: if entry selected then (if inside fog add to ends else add to starts)
+        long press in entry: edit entry
+        long press outside entry: if nothing highlighted highlight square else create entry
+     */
+
+    private boolean singleTapEntry(float ex, float ey) throws EmptyObjectException {
+        int x = (int) (ex - map.x0) / map.boxSize;
+        int y = (int) (ey - map.y0) / map.boxSize;
+        if (x >= 0 && y >= 0 && (map.width < 0 || x < map.width) && (map.height < 0 || y < map.height)) {
+            start = null;
+            GridPoint gp = new GridPoint(x, y);
+            if(selectedEntry == null) {
+                selectedEntry = selectedFog.getEntryAt(gp);
+            } else if(selectedEntry.starts.contains(gp)) {
+                selectedEntry.removeStart(gp);
+            } else if(selectedEntry.ends.contains(gp)) {
+                selectedEntry.removeEnd(gp);
+            } else if(selectedFog.contains(gp)) {
+                selectedEntry.addEnd(gp);
+            } else {
+                selectedEntry.addStart(gp);
+            }
+            invalidate();
+        }
+        return false;
+    }
+
+    private void longPressEntry(float ex, float ey) {
+        int x = (int) (ex - map.x0) / map.boxSize;
+        int y = (int) (ey - map.y0) / map.boxSize;
+        if (x >= 0 && y >= 0 && (map.width < 0 || x < map.width) && (map.height < 0 || y < map.height)) {
+            int index = selectedFog.getEntryIndexAt(x, y);
+            if(index < 0) {
+                if(start == null) {
+                    start = new GridPoint(x, y);
+                    invalidate();
+                } else if(selectedFog.contains(start) && !selectedFog.contains(x, y)) {
+                    listener.onAddEntry(x, y, start.x, start.y);
+                    start = null;
+                } else if(!selectedFog.contains(start) && selectedFog.contains(x, y)) {
+                    listener.onAddEntry(start.x, start.y, x, y);
+                    start = null;
+                } else {
+                    start = new GridPoint(x, y);
+                    invalidate();
+                }
+            } else {
+                start = null;
+                listener.onChangeEntry(index);
             }
         }
     }

@@ -126,7 +126,7 @@
                     android:id="@+id/btn_delete_enemy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/delete_selected"
+                    android:text="@string/delete"
                     android:onClick="update"/>
 
             </LinearLayout>
@@ -156,14 +156,48 @@
                     android:id="@+id/btn_deselect_fog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/deselect_fog"
+                    android:text="@string/deselect"
                     android:onClick="update"/>
 
                 <Button
                     android:id="@+id/btn_delete_fog"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/delete_selected"
+                    android:text="@string/delete"
+                    android:onClick="update"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/toolbar_entries"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/select_fog"/>
+
+                <Spinner
+                    android:id="@+id/spinner_fogs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:spinnerMode="dropdown" />
+
+                <Button
+                    android:id="@+id/btn_deselect_entry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/deselect"
+                    android:onClick="update"/>
+
+                <Button
+                    android:id="@+id/btn_delete_entry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/delete"
                     android:onClick="update"/>
 
             </LinearLayout>

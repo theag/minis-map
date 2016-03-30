@@ -8,10 +8,8 @@ import java.util.StringTokenizer;
  */
 public class Enemy {
 
-    private static final String sep = ""+((char)31);
-
     public static Enemy load(String line) {
-        StringTokenizer tokens = new StringTokenizer(line, sep);
+        StringTokenizer tokens = new StringTokenizer(line, Seperators.INSIDE_MAP);
         return new Enemy(tokens.nextToken(), tokens.nextToken(), Integer.parseInt(tokens.nextToken()), Integer.parseInt(tokens.nextToken()));
     }
 
@@ -26,6 +24,6 @@ public class Enemy {
     }
 
     public String save() {
-        return name +sep +abbreviation +sep +location.x + sep +location.y;
+        return name +Seperators.INSIDE_MAP +abbreviation +Seperators.INSIDE_MAP +location.x + Seperators.INSIDE_MAP +location.y;
     }
 }

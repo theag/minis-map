@@ -1,5 +1,8 @@
 package com.minismap.data;
 
+import com.minismap.EmptyObjectException;
+
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -8,13 +11,23 @@ import java.util.StringTokenizer;
  */
 public class FogOfWar {
 
-    private static final String sep = ""+((char)31);
-
     public static FogOfWar load(String line) {
-        StringTokenizer tokens = new StringTokenizer(line, sep);
-        FogOfWar rv = new FogOfWar(Map.emptyConvert(tokens.nextToken()));
+        StringTokenizer tokens = new StringTokenizer(line, Seperators.INSIDE_MAP);
+        FogOfWar rv = new FogOfWar(Seperators.emptyConvert(tokens.nextToken()));
+        String token;
         while(tokens.hasMoreTokens()) {
-            rv.points.add(GridPoint.load(tokens.nextToken()));
+            token = tokens.nextToken();
+            if(token.compareTo(Seperators.NEW_ARRAY_INDICATOR) == 0) {
+                break;
+            }
+            rv.points.add(GridPoint.load(token));
+        }
+        while(tokens.hasMoreTokens()) {
+            token = tokens.nextToken();
+            if(token.compareTo(Seperators.NEW_ARRAY_INDICATOR) == 0) {
+                break;
+            }
+            rv.entries.add(Entry.load(token));
         }
         return rv;
     }
@@ -69,7 +82,10 @@ public class FogOfWar {
         return points.remove(gp);
     }
 
-    public boolean removePoint(GridPoint gp) {
+    public boolean removePoint(GridPoint gp) throws EmptyObjectException {
+        if(points.size() == 1) {
+            throw new EmptyObjectException("Cannot remove last point from a fog. Press the delete button to delete a fog.");
+        }
         return points.remove(gp);
     }
 
@@ -93,8 +109,18 @@ public class FogOfWar {
         }
     }
 
-    public void removeRectangle(int startx, int starty, int endx, int endy) {
+    public void removeRectangle(int startx, int starty, int endx, int endy) throws EmptyObjectException {
         GridPoint gp;
+        int count = 0;
+        for(int i = 0; i < points.size(); i++) {
+            gp = points.get(i);
+            if(gp.x >= startx && gp.x <= endx && gp.y >= starty && gp.y <= endy) {
+                count++;
+            }
+        }
+        if(count == points.size()) {
+            throw new EmptyObjectException("Cannot remove all points from a fog. Press the delete button to delete a fog.");
+        }
         for(int i = 0; i < points.size(); i++) {
             gp = points.get(i);
             if(gp.x >= startx && gp.x <= endx && gp.y >= starty && gp.y <= endy) {
@@ -174,31 +200,50 @@ public class FogOfWar {
     }
 
     public String save() {
-        String rv = Map.emptyConvert(name);
+        String rv = Seperators.emptyConvert(name);
         for(GridPoint gp : points) {
-            rv += sep +gp.x +"," +gp.y;
+            rv += Seperators.INSIDE_MAP +gp.x +"," +gp.y;
+        }
+        rv += Seperators.INSIDE_MAP +Seperators.NEW_ARRAY_INDICATOR;
+        for(Entry entry : entries) {
+            rv += Seperators.INSIDE_MAP +entry.save();
         }
         return rv;
     }
 
-    public class Entry {
-
-        public ArrayList<GridPoint> starts;
-        public ArrayList<GridPoint> ends;
-        public String description;
-        public String abbreviation;
-        public String lockMessage;
-
-        public Entry(String abbreviation, String description, String lockMessage, GridPoint start, GridPoint end) {
-            this.abbreviation = abbreviation;
-            this.description = description;
-            this.lockMessage = lockMessage;
-            starts = new ArrayList<>();
-            starts.add(start);
-            ends = new ArrayList<>();
-            ends.add(end);
+    public Entry getEntryAt(GridPoint gp) {
+        for(Entry entry : entries) {
+            if(entry.starts.contains(gp) || entry.ends.contains(gp)) {
+                return entry;
+            }
         }
+        return null;
+    }
 
+    public int getEntryIndexAt(int x, int y) {
+        GridPoint gp = new GridPoint(x, y);
+        for(int i = 0; i < entries.size(); i++) {
+            if(entries.get(i).contains(gp)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public int entryCount() {
+        return entries.size();
+    }
+
+    public Entry getEntry(int i) {
+        return entries.get(i);
+    }
+
+    public void addEntry(String abbreviation, String lockMessage, int startx, int starty, int endx, int endy) {
+        entries.add(new Entry(abbreviation, lockMessage, new GridPoint(startx, starty), new GridPoint(endx, endy)));
+    }
+
+    public void removeEntry(Entry entry) {
+        entries.remove(entry);
     }
 
 }
